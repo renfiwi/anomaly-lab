@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16
+    container_name: anomaly-lab-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sobachka}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lygovaya}
+      POSTGRES_DB: ${POSTGRES_DB:-anomaly_lab}
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d:ro
+      - ./data:/data:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
